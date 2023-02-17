@@ -1,0 +1,7 @@
+﻿- Variable sweep of the 3 Joints together with an amplitude of 45°, 45°, and 135° during 60s.
+- Joint 1 starts at 0°
+- Joint 2 starts at 45°
+- Joint 3 starts at 0°
+- Joint 1 starts at a frequency of 0.05 and ends at 0.2
+- Joint 2 starts at a frequency of 0.01 and ends at 0.2
+- Joint 3 starts at a frequency of 0.01 and ends at 0.1

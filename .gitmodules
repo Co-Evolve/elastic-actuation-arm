@@ -1,0 +1,3 @@
+[submodule "src/erpy"]
+	path = src/erpy
+	url = git@github.com:Co-Evolve/erpy.git

@@ -1,0 +1,66 @@
+<mujoco model="elastic-actuation-arm">
+    <compiler angle="radian" discardvisual="true"/>
+    <default>
+        <default class="/"/>
+    </default>
+    <asset>
+        <mesh name="base" class="/" file="link0-07b8cbe73d2f8b0098761f3f144c81b027ae70d7.stl"
+              scale="0.001 0.001 0.001"/>
+        <mesh name="upper_arm" class="/" file="link1-a01c38b7db553b583f90389da4f7d331e26703c9.stl"
+              scale="0.001 0.001 0.001"/>
+        <mesh name="forearm" class="/" file="link2-639edbd21e13106a9daae76e448db90844721d9e.stl"
+              scale="0.001 0.001 0.001"/>
+    </asset>
+    <worldbody>
+        <body name="base" pos="0 0 0" euler="0 0 -1.5707963267948966">
+            <inertial pos="0 0 0" mass="4.524"
+                      fullinertia="0.063350000000000004 0.032939999999999997 0.063299999999999995 0 0.0064999999999999997 0"/>
+            <geom name="//unnamed_geom_0" class="/" type="mesh"
+                  rgba="0.49019607843137253 0.70980392156862748 0.6588235294117647 1" mesh="base"/>
+            <body name="upper-arm" pos="0 0 0.070000000000000007" euler="0 1.5707963267948966 1.5707963267948966">
+                <inertial pos="0.080193 -0.00108 -0.018886" mass="4.0289999999999999"
+                          fullinertia="0.012784922000000001 0.040284487000000001 0.030942239 9.6092000000000001e-05 0.0032788069999999999 0"/>
+                <geom name="//unnamed_geom_1" class="/" type="mesh"
+                      rgba="0.49019607843137253 0.70980392156862748 0.6588235294117647 1" mesh="upper_arm"/>
+                <joint name="shoulder" class="/" type="hinge" axis="0 0 1" limited="true"
+                       range="-0.17453292519943295 2.6179938779914944" armature="0.22539999999999999"
+                       damping="39.957999999999998" frictionloss="7.8769999999999998"/>
+                <body name="forearm" pos="0.29999999999999999 0 0" euler="0 0 0">
+                    <inertial pos="0.10841000000000001 -0.00034600000000000001 -0.0063790000000000001" mass="2.181"
+                              fullinertia="0.0048090859999999997 0.042672458000000003 0.038977763999999998 0 0.00024000000000000001 2.8119999999999999e-06"/>
+                    <geom name="//unnamed_geom_2" class="/" type="mesh"
+                          rgba="0.49019607843137253 0.70980392156862748 0.6588235294117647 1" mesh="forearm"/>
+                    <joint name="elbow" class="/" type="hinge" axis="0 0 -1" limited="true"
+                           range="-2.4434609527920612 2.4434609527920612" armature="0.030640000000000001"
+                           damping="22.831" frictionloss="6.1280000000000001"/>
+                    <body name="end_effector" pos="0.31 0 -0.001" euler="0 0 0">
+                        <geom name="end_effector" class="/" type="box"
+                              size="0.050000000000000003 0.050000000000000003 0.01" rgba="0 0 0 0" mass="0" pos="0 0 0"
+                              euler="0 1.5707963267948966 0"/>
+                        <site name="end_effector_site" class="/" type="box" rgba="0 0 0 0"
+                              size="0.050000000000000003 0.050000000000000003 0.01" pos="0 0 0"
+                              euler="0 1.5707963267948966 0"/>
+                    </body>
+                </body>
+            </body>
+        </body>
+    </worldbody>
+    <contact>
+        <exclude name="base_upperarm" body1="base" body2="upper-arm"/>
+        <exclude name="upperarm_forearm" body1="upper-arm" body2="forearm"/>
+        <exclude name="forearm_endeffector" body1="forearm" body2="end_effector"/>
+    </contact>
+    <actuator>
+        <position name="shoulder_p_actuator" class="/" ctrllimited="true" forcelimited="true"
+                  ctrlrange="-0.17453292519943295 2.6179938779914944" forcerange="-157.5 157.5" gear="1"
+                  joint="shoulder" kp="572.95779513082323"/>
+        <position name="elbow_p_actuator" class="/" ctrllimited="true" forcelimited="true"
+                  ctrlrange="-2.4434609527920612 2.4434609527920612" forcerange="-95.25 95.25" gear="1" joint="elbow"
+                  kp="572.95779513082323"/>
+        <adhesion name="end_effector_suction_actuator" class="/" ctrlrange="0 1" body="end_effector" gain="2000"/>
+    </actuator>
+    <sensor>
+        <actuatorfrc name="shoulder_actuator_torque" actuator="shoulder_p_actuator"/>
+        <actuatorfrc name="elbow_actuator_torque" actuator="elbow_p_actuator"/>
+    </sensor>
+</mujoco>
