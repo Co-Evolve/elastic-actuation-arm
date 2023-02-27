@@ -20,6 +20,27 @@ class CMAESSaverConfig(SaverConfig):
     def saver(self) -> Type[CMAESSaver]:
         return CMAESSaver
 
+import io
+
+
+class RenameUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        renamed_module = module
+        print(module)
+        if module == "elastic_actuation_arm.simulation.pick_and_place.optimisation.spring_trajectory_co_optimisation.genome":
+            renamed_module = "elastic_actuation_arm.pick_and_place.optimisation.robot.genome"
+
+        return super(RenameUnpickler, self).find_class(renamed_module, name)
+
+
+def renamed_load(file_obj):
+    return RenameUnpickler(file_obj).load()
+
+
+def renamed_loads(pickled_bytes):
+    file_obj = io.BytesIO(pickled_bytes)
+    return renamed_load(file_obj)
+
 
 class CMAESSaver(Saver):
     def __init__(self, config: EAConfig) -> None:
@@ -40,7 +61,8 @@ class CMAESSaver(Saver):
         elite_path = Path(self.config.save_path) / "elite.pickle"
 
         with open(elite_path, 'rb') as handle:
-            elite = pickle.load(handle)
+            elite = renamed_load(handle)
+            # elite = pickle.load(handle)
 
         return [elite]
 

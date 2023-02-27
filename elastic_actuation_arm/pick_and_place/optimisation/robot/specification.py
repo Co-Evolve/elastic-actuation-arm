@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from elastic_actuation_arm.entities.manipulator.specification import ManipulatorMorphologySpecification
-from elastic_actuation_arm.pick_and_place.optimization.robot.controller import \
+from elastic_actuation_arm.pick_and_place.optimisation.robot.controller import \
     ManipulatorAkimaSpineControllerSpecification
 from erpy.base.specification import RobotSpecification
 

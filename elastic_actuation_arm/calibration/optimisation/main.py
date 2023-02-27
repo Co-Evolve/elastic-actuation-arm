@@ -6,12 +6,12 @@ import psutil
 import ray
 
 from elastic_actuation_arm.calibration.environment.environment import CalibrationEnvironmentConfig
-from elastic_actuation_arm.calibration.optimization.evaluation_callbacks import \
+from elastic_actuation_arm.calibration.optimisation.evaluation_callbacks import \
     SpringStiffnessPerturbationCallback, TrajectoryPlotCallback, UpdateExperimentIndexCallback, \
     LoadTorqueNRMSEFitnessCallback
-from elastic_actuation_arm.calibration.optimization.robot.genome import ManipulatorCalibrationGenomeConfig
-from elastic_actuation_arm.calibration.optimization.logger import CalibrationLoggerConfig
-from elastic_actuation_arm.calibration.optimization.robot.robot import ManipulatorCalibrationRobot
+from elastic_actuation_arm.calibration.optimisation.robot.genome import ManipulatorCalibrationGenomeConfig
+from elastic_actuation_arm.calibration.optimisation.logger import CalibrationLoggerConfig
+from elastic_actuation_arm.calibration.optimisation.robot.robot import ManipulatorCalibrationRobot
 from erpy.algorithms.cma_es.population import CMAESPopulationConfig
 from erpy.algorithms.cma_es.reproducer import CMAESReproducerConfig
 from erpy.algorithms.cma_es.saver import CMAESSaverConfig

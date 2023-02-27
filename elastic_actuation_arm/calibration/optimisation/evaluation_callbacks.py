@@ -9,7 +9,7 @@ from elastic_actuation_arm.calibration.environment.environment import Calibratio
     parse_calibration_environment_observations
 from elastic_actuation_arm.calibration.environment.experiment_configuration_handler import \
     align_measurements
-from elastic_actuation_arm.calibration.optimization.robot.genome import ManipulatorCalibrationGenome
+from elastic_actuation_arm.calibration.optimisation.robot.genome import ManipulatorCalibrationGenome
 from elastic_actuation_arm.entities.manipulator.elastic_actuation import calculate_load_torque
 from erpy.base.ea import EAConfig
 from erpy.base.evaluator import EvaluationCallback, EvaluationResult

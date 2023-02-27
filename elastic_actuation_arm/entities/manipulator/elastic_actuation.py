@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 from dm_control.mjcf import Physics
 
@@ -7,21 +9,24 @@ from elastic_actuation_arm.entities.manipulator.specification import ParallelSpr
 
 def apply_elastic_actuation(physics: Physics,
                             shoulder_joint, elbow_joint,
-                            spec: ManipulatorMorphologySpecification) -> None:
+                            spec: ManipulatorMorphologySpecification) -> Tuple[float, float, float, float]:
     shoulder_physics = physics.bind(shoulder_joint)
     elbow_physics = physics.bind(elbow_joint)
 
-    parallel_elastic_actuation(joint_physics=shoulder_physics, spring_spec=spec.upper_arm_spec.spring_spec,
-                               counter_clockwise=True)
-    parallel_elastic_actuation(joint_physics=elbow_physics, spring_spec=spec.fore_arm_spec.spring_spec,
-                               counter_clockwise=False)
-    biarticular_elastic_actuation(shoulder_physics=shoulder_physics,
-                                  elbow_physics=elbow_physics,
-                                  spring_spec=spec.biarticular_spring_spec)
+    shoulder_pea_torque = parallel_elastic_actuation(joint_physics=shoulder_physics,
+                                                     spring_spec=spec.upper_arm_spec.spring_spec,
+                                                     counter_clockwise=True)
+    elbow_pea_torque = parallel_elastic_actuation(joint_physics=elbow_physics,
+                                                  spring_spec=spec.fore_arm_spec.spring_spec,
+                                                  counter_clockwise=False)
+    shoulder_bea_torque, elbow_bea_torque = biarticular_elastic_actuation(shoulder_physics=shoulder_physics,
+                                                                          elbow_physics=elbow_physics,
+                                                                          spring_spec=spec.biarticular_spring_spec)
+    return shoulder_pea_torque, -elbow_pea_torque, shoulder_bea_torque, elbow_bea_torque
 
 
 def parallel_elastic_actuation(joint_physics: Physics, spring_spec: ParallelSpringSpecification,
-                               counter_clockwise: bool) -> None:
+                               counter_clockwise: bool) -> float:
     stiffness = spring_spec.stiffness.value
     equilibrium_angle = spring_spec.equilibrium_angle.value
 
@@ -33,10 +38,16 @@ def parallel_elastic_actuation(joint_physics: Physics, spring_spec: ParallelSpri
         should_apply_force = current_angle >= equilibrium_angle
 
     if should_apply_force:
-        joint_physics.qfrc_passive += stiffness * (equilibrium_angle - current_angle)
+        torque = stiffness * (equilibrium_angle - current_angle)
+    else:
+        torque = 0.0
+
+    joint_physics.qfrc_passive += torque
+    return torque
 
 
-def biarticular_elastic_actuation(shoulder_physics, elbow_physics, spring_spec: BiarticularSpringSpecification) -> None:
+def biarticular_elastic_actuation(shoulder_physics, elbow_physics,
+                                  spring_spec: BiarticularSpringSpecification) -> float:
     q0 = spring_spec.q0.value
     q2 = shoulder_physics.qpos[0]
     # negate the elbow's position because we work in a frame where positive should point counter-clockwise
@@ -54,9 +65,13 @@ def biarticular_elastic_actuation(shoulder_physics, elbow_physics, spring_spec: 
 
         shoulder_torque = k * r2 * x
         # Biarticular spring applies torque that counteracts gravity -> negate elbow torque
-        elbow_torque = -(k * r3 * x)
+        elbow_torque = k * r3 * x
         shoulder_physics.qfrc_passive += shoulder_torque
-        elbow_physics.qfrc_passive += elbow_torque
+        elbow_physics.qfrc_passive -= elbow_torque
+    else:
+        shoulder_torque, elbow_torque = 0.0, 0.0
+
+    return shoulder_torque, elbow_torque
 
 
 def calculate_load_torque(joint_index: int, torque: np.ndarray, vel: np.ndarray, dt: float = None,

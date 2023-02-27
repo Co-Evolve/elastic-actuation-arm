@@ -5,7 +5,7 @@ from typing import Type, Optional, List
 
 import numpy as np
 
-from elastic_actuation_arm.pick_and_place.optimization.robot.specification import \
+from elastic_actuation_arm.pick_and_place.optimisation.robot.specification import \
     ManipulatorPickAndPlaceSpringTrajectorySpecification
 from erpy.base.genome import ESGenome, Genome, ESGenomeConfig
 from erpy.base.parameters import ContinuousParameter, Parameter, DiscreteParameter

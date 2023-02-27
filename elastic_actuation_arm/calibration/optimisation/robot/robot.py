@@ -1,4 +1,4 @@
-from elastic_actuation_arm.calibration.optimization.robot.controller import ManipulatorCalibrationController
+from elastic_actuation_arm.calibration.optimisation.robot.controller import ManipulatorCalibrationController
 from elastic_actuation_arm.entities.manipulator.manipulator import ManipulatorMorphology
 from erpy.base.specification import RobotSpecification
 from erpy.interfaces.mujoco.phenome import MJCRobot

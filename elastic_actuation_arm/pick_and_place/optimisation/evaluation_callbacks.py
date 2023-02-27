@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import cast, Tuple
+from typing import cast, Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -7,9 +7,10 @@ import scipy
 from matplotlib import pyplot as plt
 
 from elastic_actuation_arm.entities.manipulator.elastic_actuation import calculate_load_torque
+from elastic_actuation_arm.entities.manipulator.manipulator import ManipulatorMorphology
 from elastic_actuation_arm.pick_and_place.environment.environment import PickAndPlaceEnvironmentConfig, \
     parse_pickandplace_environment_observations
-from elastic_actuation_arm.pick_and_place.optimization.robot.robot import ManipulatorPickAndPlaceSpringTrajectoryRobot
+from elastic_actuation_arm.pick_and_place.optimisation.robot.robot import ManipulatorPickAndPlaceSpringTrajectoryRobot
 from erpy.base.ea import EAConfig
 from erpy.base.evaluator import EvaluationCallback, EvaluationResult
 from erpy.base.genome import Genome
@@ -86,13 +87,19 @@ class QQVelTorqueRecorderCallback(EvaluationCallback):
 
         self._environment_config = cast(PickAndPlaceEnvironmentConfig, self.config.environment_config)
         self._simulation_measurements = []
+        self._morphology: Optional[ManipulatorMorphology] = None
         self._measurement_keys = ['timestep',
                                   'shoulder_q', 'elbow_q',
                                   'shoulder_q_vel', 'elbow_q_vel',
-                                  'shoulder_torque', 'elbow_torque']
+                                  'shoulder_torque', 'elbow_torque',
+                                  'shoulder_pea_torque', 'elbow_pea_torque',
+                                  'shoulder_bea_torque', 'elbow_bea_torque']
 
     def after_episode(self):
         self._simulation_measurements = np.array(self._simulation_measurements)
+
+    def from_robot(self, robot: ManipulatorPickAndPlaceSpringTrajectoryRobot):
+        self._morphology = robot.morphology
 
     def before_step(self, observations, actions):
         # Parse the observations -> get measurements
@@ -106,7 +113,9 @@ class QQVelTorqueRecorderCallback(EvaluationCallback):
             in_ret_phase = relative_time > ret_phase_start
 
             if in_go_phase or in_ret_phase:
-                measurement = [in_go_phase] + [obs_dict[key] for key in self._measurement_keys]
+                measurement = [in_go_phase] + [obs_dict[key] for key in self._measurement_keys if key in obs_dict]
+                measurement += [self._morphology.last_pea_torque_shoulder, self._morphology.last_pea_torque_elbow,
+                                self._morphology.last_bea_torque_shoulder, self._morphology.last_bea_torque_elbow]
                 self._simulation_measurements.append(measurement)
 
 
@@ -167,7 +176,9 @@ class TrajectorySaverCallback(QQVelTorqueRecorderCallback):
 
         self._base_path = Path(self._ea_config.saver_config.analysis_path) / "trajectory_data"
         self._base_path.mkdir(parents=True, exist_ok=True)
+        self._pea_torques, self._bea_torques = [], []
         self._genome_id = None
+        self._morphology = None
 
     def from_genome(self, genome: Genome) -> None:
         self._genome_id = genome.genome_id
@@ -194,21 +205,29 @@ class TrajectorySaverCallback(QQVelTorqueRecorderCallback):
             elbow_q_acc = np.gradient(elbow_q_vel, control_timestep)
             shoulder_torque = measurements[:, 5]
             elbow_torque = measurements[:, 6]
+            pea_shoulder_torque = measurements[:, 7]
+            pea_elbow_torque = measurements[:, 8]
+            bea_shoulder_torque = measurements[:, 9]
+            bea_elbow_torque = measurements[:, 10]
 
             COLUMNS = ["time",
                        "q", "q_vel", "q_acc",
-                       "useless1", "torque", "useless2"]
+                       "useless1", "torque", "useless2",
+                       "pea_torque", "bea_torque"]
+
             # Shoulder data
             shoulder_data = np.vstack((timesteps,
                                        shoulder_q, shoulder_q_vel, shoulder_q_acc,
-                                       np.zeros(timesteps.shape), shoulder_torque, np.zeros(timesteps.shape)
+                                       np.zeros(timesteps.shape), shoulder_torque, np.zeros(timesteps.shape),
+                                       pea_shoulder_torque, bea_shoulder_torque
                                        )).T
             shoulder_df = pd.DataFrame(data=shoulder_data, columns=COLUMNS)
 
             # Elbow data
             elbow_data = np.vstack((timesteps,
                                     elbow_q, elbow_q_vel, elbow_q_acc,
-                                    np.zeros(timesteps.shape), elbow_torque, np.zeros(timesteps.shape))).T
+                                    np.zeros(timesteps.shape), elbow_torque, np.zeros(timesteps.shape),
+                                   pea_elbow_torque, bea_elbow_torque)).T
             elbow_df = pd.DataFrame(data=elbow_data, columns=COLUMNS)
 
             # Save dfs

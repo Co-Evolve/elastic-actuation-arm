@@ -13,6 +13,10 @@ from erpy.interfaces.mujoco.phenome import MJCMorphology, MJCMorphologyPart
 class ManipulatorMorphology(MJCMorphology):
     def __init__(self, specification: ManipulatorMorphologySpecification):
         super().__init__(specification, model_name='elastic-actuation-arm')
+        self.last_pea_torque_shoulder = 0.0
+        self.last_pea_torque_elbow = 0.0
+        self.last_bea_torque_shoulder = 0.0
+        self.last_bea_torque_elbow = 0.0
 
     @property
     def specification(self) -> ManipulatorMorphologySpecification:
@@ -58,10 +62,12 @@ class ManipulatorMorphology(MJCMorphology):
         shoulder_joint = self.mjcf_model.find('joint', 'shoulder')
         elbow_joint = self.mjcf_model.find('joint', 'elbow')
 
-        apply_elastic_actuation(physics=physics,
-                                shoulder_joint=shoulder_joint,
-                                elbow_joint=elbow_joint,
-                                spec=self.specification)
+        self.last_pea_torque_shoulder, self.last_pea_torque_elbow, \
+        self.last_bea_torque_shoulder, self.last_bea_torque_elbow = apply_elastic_actuation(
+            physics=physics,
+            shoulder_joint=shoulder_joint,
+            elbow_joint=elbow_joint,
+            spec=self.specification)
 
     @property
     def fore_arm(self) -> MJCMorphologyPart:

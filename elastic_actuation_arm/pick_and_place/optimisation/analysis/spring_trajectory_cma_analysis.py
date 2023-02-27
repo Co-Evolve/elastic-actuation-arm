@@ -6,31 +6,27 @@ from pathlib import Path
 import numpy as np
 import psutil
 import ray
-from elastic_actuation_arm.pick_and_place.optimization.spring.common.evaluation_callbacks import \
-    LTTrajectoryCallback, TrajectorySaverCallback, ParametersPhenomeDescriptorCallback, \
-    LoadTorqueIntegralSquaredFitnessCallback, LoadTorqueRMSLoggerCallback, TrajectoryPlotCallback
 from tqdm import tqdm
 
 from elastic_actuation_arm.pick_and_place.environment.environment import PickAndPlaceEnvironmentConfig
-from elastic_actuation_arm.pick_and_place.optimization.evaluation_callbacks import \
-    AdaptEnvironmentConfigCallback, JointVelocityPenaltyCallback
-from elastic_actuation_arm.pick_and_place.optimization.robot.genome import \
+from elastic_actuation_arm.pick_and_place.optimisation.evaluation_callbacks import \
+    AdaptEnvironmentConfigCallback, JointVelocityPenaltyCallback, LoadTorqueIntegralSquaredFitnessCallback, \
+    TrajectorySaverCallback
+from elastic_actuation_arm.pick_and_place.optimisation.robot.genome import \
     ManipulatorPickAndPlaceSpringTrajectoryGenomeConfig
-from elastic_actuation_arm.pick_and_place.optimization.robot import \
-    ManipulatorPickAndPlaceSpringTrajectoryRobot
+from elastic_actuation_arm.pick_and_place.optimisation.robot.robot import ManipulatorPickAndPlaceSpringTrajectoryRobot
 from erpy.algorithms.cma_es.logger import CMAESLoggerConfig
 from erpy.algorithms.cma_es.population import CMAESPopulationConfig
 from erpy.algorithms.cma_es.reproducer import CMAESReproducerConfig
 from erpy.algorithms.cma_es.saver import CMAESSaverConfig
 from erpy.base.ea import EA, EAConfig
-from erpy.evaluators.evaluation_callbacks.video import VideoCallback
 from erpy.evaluators.ray.evaluation_actor import make_base_evaluation_actor
 from erpy.evaluators.ray.evaluator import RayDistributedEvaluatorConfig
 from erpy.selectors.dummy import DummySelectorConfig
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Pick And Place - Spring + Trajectory optimization")
+        description="Pick And Place - Spring + Trajectory optimisation")
     parser.add_argument('--wandb-tags', nargs='+')
     parser.add_argument('--wandb-group', type=str, default='pap-spring-trajectory-co-opt')
     parser.add_argument("--total-num-cores", type=int, default=psutil.cpu_count())
@@ -69,14 +65,12 @@ if __name__ == '__main__':
         num_cores_per_worker=1,
         num_eval_episodes=1,
         actor_generator=make_base_evaluation_actor,
-        callbacks=[ParametersPhenomeDescriptorCallback,
-                   AdaptEnvironmentConfigCallback,
+        callbacks=[AdaptEnvironmentConfigCallback,
                    LoadTorqueIntegralSquaredFitnessCallback,
-                   LoadTorqueRMSLoggerCallback],
+                   ],
         analyze_callbacks=[LoadTorqueIntegralSquaredFitnessCallback, AdaptEnvironmentConfigCallback,
-                           LTTrajectoryCallback, TrajectoryPlotCallback, TrajectorySaverCallback,
-                           LoadTorqueRMSLoggerCallback, JointVelocityPenaltyCallback,
-                           VideoCallback
+                           TrajectorySaverCallback,
+                           JointVelocityPenaltyCallback,
                            ],
         evaluation_timeout=None,
         hard_episode_reset=False
@@ -115,7 +109,7 @@ if __name__ == '__main__':
 
     ea = EA(config=ea_config)
 
-    spring_configs = ["nea", "pea", "bea", "full"]
+    spring_configs = ["bea"]
     all_genomes = []
     all_evaluation_results = []
     all_run_paths = []
@@ -170,6 +164,8 @@ if __name__ == '__main__':
         print(f"\tBest genome index:    {best_genome.genome_id}")
         print_best_mean_std("Load torque integral", np.abs(fitnesses), best_index)
         print(f"\t\tAll load torques: {list(np.abs(fitnesses))}")
+        for fitness, path in zip(fitnesses, run_paths):
+            print(f"\t\t{path}\t{fitness}")
 
         for name, parameters in zip(genome_config.parameter_labels, rescaled_parameters):
             if 'equilibrium_angle' in name or 'q0' in name:

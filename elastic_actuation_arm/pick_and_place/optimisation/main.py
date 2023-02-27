@@ -6,12 +6,12 @@ import psutil
 import ray
 
 from elastic_actuation_arm.pick_and_place.environment.environment import PickAndPlaceEnvironmentConfig
-from elastic_actuation_arm.pick_and_place.optimization.evaluation_callbacks import \
+from elastic_actuation_arm.pick_and_place.optimisation.evaluation_callbacks import \
     AdaptEnvironmentConfigCallback, JointVelocityPenaltyCallback, LoadTorqueIntegralSquaredFitnessCallback, \
     LTTrajectoryCallback, TrajectorySaverCallback
-from elastic_actuation_arm.pick_and_place.optimization.robot.genome import \
+from elastic_actuation_arm.pick_and_place.optimisation.robot.genome import \
     ManipulatorPickAndPlaceSpringTrajectoryGenomeConfig
-from elastic_actuation_arm.pick_and_place.optimization.robot.robot import ManipulatorPickAndPlaceSpringTrajectoryRobot
+from elastic_actuation_arm.pick_and_place.optimisation.robot.robot import ManipulatorPickAndPlaceSpringTrajectoryRobot
 from erpy.algorithms.cma_es.logger import CMAESLoggerConfig
 from erpy.algorithms.cma_es.population import CMAESPopulationConfig
 from erpy.algorithms.cma_es.reproducer import CMAESReproducerConfig
@@ -23,7 +23,7 @@ from erpy.selectors.dummy import DummySelectorConfig
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description="Pick And Place - Spring + Trajectory optimization")
+        description="Pick And Place - Spring + Trajectory optimisation")
     parser.add_argument('--wandb-tags', nargs='+')
     parser.add_argument('--wandb-group', type=str, default='pap-spring-trajectory-co-opt')
     parser.add_argument('--spring-config', default='full', choices=['nea', 'pea', 'bea', 'full',

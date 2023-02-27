@@ -1,7 +1,7 @@
 from elastic_actuation_arm.entities.manipulator.manipulator import ManipulatorMorphology
-from elastic_actuation_arm.pick_and_place.optimization.robot.controller import \
+from elastic_actuation_arm.pick_and_place.optimisation.robot.controller import \
     ManipulatorAkimaSpineController
-from elastic_actuation_arm.pick_and_place.optimization.robot.specification import \
+from elastic_actuation_arm.pick_and_place.optimisation.robot.specification import \
     ManipulatorPickAndPlaceSpringTrajectorySpecification
 from erpy.interfaces.mujoco.phenome import MJCRobot
 

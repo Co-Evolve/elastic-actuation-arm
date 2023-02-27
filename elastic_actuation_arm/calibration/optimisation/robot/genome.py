@@ -5,9 +5,9 @@ from typing import Type, Optional, List
 
 import numpy as np
 
-from elastic_actuation_arm.calibration.optimization.robot.controller import \
+from elastic_actuation_arm.calibration.optimisation.robot.controller import \
     ManipulatorCalibrationControllerSpecification
-from elastic_actuation_arm.calibration.optimization.robot.specification import ManipulatorCalibrationSpecification
+from elastic_actuation_arm.calibration.optimisation.robot.specification import ManipulatorCalibrationSpecification
 from elastic_actuation_arm.entities.manipulator.specification import ManipulatorMorphologySpecification
 from erpy.base.genome import ESGenome, ESGenomeConfig, Genome
 from erpy.base.parameters import ContinuousParameter
