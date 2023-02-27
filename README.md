@@ -1,4 +1,4 @@
-# A Comparative Analysis on Genome Pleiotropy for Evolved Soft Robots
+# Minimizing torque requirements in robotic manipulation through Elastic Elements Optimization in a Physics Engine
 
 [PDF]() | [site](https://sites.google.com/view/elastic-actuation/main)| **Abstract**:  todo
 
