@@ -10,20 +10,36 @@ from erpy.base.specification import MorphologySpecification, Specification
 
 
 class PActuatorSpecification(Specification):
-    def __init__(self, gear: float, kp: float, force_limit=Tuple[float, float]) -> None:
+    def __init__(
+            self,
+            gear: float,
+            kp: float,
+            force_limit=Tuple[float, float]
+            ) -> None:
         self.gear = FixedParameter(value=gear)
         self.kp = FixedParameter(value=kp)
         self.force_limit = FixedParameter(value=force_limit)
 
 
 class ParallelSpringSpecification(Specification):
-    def __init__(self, stiffness: ContinuousParameter, equilibrium_angle: ContinuousParameter) -> None:
+    def __init__(
+            self,
+            stiffness: ContinuousParameter,
+            equilibrium_angle: ContinuousParameter
+            ) -> None:
         self.stiffness = stiffness
         self.equilibrium_angle = equilibrium_angle
 
 
 class BiarticularSpringSpecification(Specification):
-    def __init__(self, stiffness: float, q0: float, r1: float, r2: float, r3: float) -> None:
+    def __init__(
+            self,
+            stiffness: float,
+            q0: float,
+            r1: float,
+            r2: float,
+            r3: float
+            ) -> None:
         spr1 = {i * 2.057 for i in range(6)}
         spr2 = {i * 3.426 for i in range(5)}
         stiffness_options = list(spr1.union(spr2))
@@ -39,9 +55,16 @@ class BiarticularSpringSpecification(Specification):
 
 
 class LinkSpecification(Specification):
-    def __init__(self, joint_range: List[float], joint_damping: float, joint_armature: float,
-                 joint_friction_loss: float, mass: float,
-                 p_actuator_spec: PActuatorSpecification, spring_spec: ParallelSpringSpecification) -> None:
+    def __init__(
+            self,
+            joint_range: List[float],
+            joint_damping: float,
+            joint_armature: float,
+            joint_friction_loss: float,
+            mass: float,
+            p_actuator_spec: PActuatorSpecification,
+            spring_spec: ParallelSpringSpecification
+            ) -> None:
         self.joint_damping = FixedParameter(value=joint_damping)
         self.joint_friction_loss = FixedParameter(value=joint_friction_loss)
         self.joint_armature = FixedParameter(value=joint_armature)
@@ -53,7 +76,10 @@ class LinkSpecification(Specification):
 
 
 class EndEffectorSpecification(Specification):
-    def __init__(self, adhesion: bool) -> None:
+    def __init__(
+            self,
+            adhesion: bool
+            ) -> None:
         self.adhesion = FixedParameter(adhesion)
 
 
@@ -66,65 +92,75 @@ class ManipulatorMorphologySpecification(MorphologySpecification):
     biarticular_spring_spec: BiarticularSpringSpecification
 
     @property
-    def joint_ranges(self) -> np.array:
-        return np.vstack([
-            self.base_spec.joint_range.value,
-            self.upper_arm_spec.joint_range.value,
-            self.fore_arm_spec.joint_range.value
-        ]).T
+    def joint_ranges(
+            self
+            ) -> np.array:
+        return np.vstack(
+                [self.base_spec.joint_range.value, self.upper_arm_spec.joint_range.value,
+                        self.fore_arm_spec.joint_range.value]
+                ).T
 
     @staticmethod
     def default() -> ManipulatorMorphologySpecification:
         base_spec = LinkSpecification(
-            joint_range=np.array([-np.pi, np.pi]),
-            joint_damping=2,
-            joint_armature=3.189,
-            joint_friction_loss=9.006,
-            mass=4.524,
-            p_actuator_spec=None,
-            spring_spec=None
-        )
+                joint_range=np.array([-np.pi, np.pi]),
+                joint_damping=2,
+                joint_armature=3.189,
+                joint_friction_loss=9.006,
+                mass=4.524,
+                p_actuator_spec=None,
+                spring_spec=None
+                )
         upper_arm_spec = LinkSpecification(
-            joint_range=np.array([-10 / 180 * np.pi, 150 / 180 * np.pi]),
-            joint_damping=39.958,
-            joint_armature=0.2254,
-            joint_friction_loss=7.877,
-            mass=4.029,
-            p_actuator_spec=PActuatorSpecification(gear=1, kp=572.9577951308232, force_limit=[-157.5, 157.5]),
-            spring_spec=ParallelSpringSpecification(
-                stiffness=ContinuousParameter(low=0.0, high=13.705, value=13.705),
-                equilibrium_angle=ContinuousParameter(low=-10 / 180 * np.pi,
-                                                      high=140 / 180 * np.pi,
-                                                      value=110 / 180 * np.pi))
-        )
+                joint_range=np.array([-10 / 180 * np.pi, 150 / 180 * np.pi]),
+                joint_damping=39.958,
+                joint_armature=0.2254,
+                joint_friction_loss=7.877,
+                # joint_damping=31.958,
+                # joint_armature=0.2254,
+                # joint_friction_loss=16.877,
+                mass=4.029,
+                p_actuator_spec=PActuatorSpecification(gear=1, kp=572.9577951308232, force_limit=[-157.5, 157.5]),
+                spring_spec=ParallelSpringSpecification(
+                        stiffness=ContinuousParameter(low=0.0, high=13.705, value=13.705),
+                        equilibrium_angle=ContinuousParameter(
+                            low=-10 / 180 * np.pi, high=140 / 180 * np.pi, value=110 / 180 * np.pi
+                            )
+                        )
+                )
 
         fore_arm_spec = LinkSpecification(
-            joint_range=np.array([-140 / 180 * np.pi, 140 / 180 * np.pi]),
-            joint_damping=22.831,
-            joint_armature=0.03064,
-            joint_friction_loss=6.128,
-            mass=2.181,
-            p_actuator_spec=PActuatorSpecification(gear=1, kp=572.9577951308232, force_limit=[-95.25, 95.25]),
-            spring_spec=ParallelSpringSpecification(stiffness=ContinuousParameter(low=0.0, high=1.32,
-                                                                                  value=1.32),
-                                                    equilibrium_angle=ContinuousParameter(low=-140 / 180 * np.pi,
-                                                                                          high=140 / 180 * np.pi,
-                                                                                          value=-140 / 180 * np.pi))
-        )
+                joint_range=np.array([-140 / 180 * np.pi, 140 / 180 * np.pi]),
+                joint_damping=22.831,
+                joint_armature=0.03064,
+                joint_friction_loss=6.128,
+                # joint_damping=18.831,
+                # joint_armature=0.03064,
+                # joint_friction_loss=7.128,
+                mass=2.181,
+                p_actuator_spec=PActuatorSpecification(gear=1, kp=572.9577951308232, force_limit=[-95.25, 95.25]),
+                spring_spec=ParallelSpringSpecification(
+                    stiffness=ContinuousParameter(
+                        low=0.0, high=1.32, value=1.32
+                        ), equilibrium_angle=ContinuousParameter(
+                        low=-140 / 180 * np.pi, high=140 / 180 * np.pi, value=-140 / 180 * np.pi
+                        )
+                    )
+                )
 
         end_effector_spec = EndEffectorSpecification(adhesion=True)
 
-        biarticular_spring_spec = BiarticularSpringSpecification(stiffness=3.426,
-                                                                 q0=-150 / 180 * np.pi,
-                                                                 r1=0.019,
-                                                                 r2=0.018,
-                                                                 r3=0.014)
+        biarticular_spring_spec = BiarticularSpringSpecification(
+            stiffness=3.426, q0=-150 / 180 * np.pi, r1=0.019, r2=0.018, r3=0.014
+            )
 
-        return ManipulatorMorphologySpecification(base_spec=base_spec,
-                                                  upper_arm_spec=upper_arm_spec,
-                                                  fore_arm_spec=fore_arm_spec,
-                                                  end_effector_spec=end_effector_spec,
-                                                  biarticular_spring_spec=biarticular_spring_spec)
+        return ManipulatorMorphologySpecification(
+            base_spec=base_spec,
+            upper_arm_spec=upper_arm_spec,
+            fore_arm_spec=fore_arm_spec,
+            end_effector_spec=end_effector_spec,
+            biarticular_spring_spec=biarticular_spring_spec
+            )
 
     @staticmethod
     def pea_default() -> ManipulatorMorphologySpecification:

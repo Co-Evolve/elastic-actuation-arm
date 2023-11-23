@@ -1,0 +1,9 @@
+stiffness joint 2 = 13.7052 Nm/rad
+stiffness joint 3 = 0 Nm/rad
+equilibrium angle joint 2 = 100°
+equilibrium angle joint 3 = 0°
+stiffness BPEA = 4.40 Nm/rad
+equilibrium angle = -180°
+r1 = 19mm
+r2 = 19mm
+r3 = 14mm
