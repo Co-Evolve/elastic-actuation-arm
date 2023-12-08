@@ -1,5 +1,0 @@
-stiffness BPEA = 3.425 Nm/rad
-equilibrium angle = -150°
-r1 = 19mm
-r2 = 19mm
-r3 = 14mm
