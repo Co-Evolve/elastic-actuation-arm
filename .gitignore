@@ -137,3 +137,4 @@ dmypy.json
 *.mp4
 *.zip
 elastic_actuation_arm/pick_and_place/optimisation/data/
+*data/

@@ -241,3 +241,4 @@ class CalibrationEnvironmentConfig(MJCEnvironmentConfig):
     @property
     def time_scale(self) -> float:
         return 1.0
+

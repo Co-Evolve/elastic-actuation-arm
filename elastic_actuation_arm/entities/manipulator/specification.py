@@ -134,14 +134,11 @@ class ManipulatorMorphologySpecification(MorphologySpecification):
                 joint_damping=22.831,
                 joint_armature=0.03064,
                 joint_friction_loss=6.128,
-                # joint_damping=18.831,
-                # joint_armature=0.03064,
-                # joint_friction_loss=7.128,
                 mass=2.181,
                 p_actuator_spec=PActuatorSpecification(gear=1, kp=572.9577951308232, force_limit=[-95.25, 95.25]),
                 spring_spec=ParallelSpringSpecification(
                     stiffness=ContinuousParameter(
-                        low=0.0, high=1.32, value=1.32
+                        low=0.0, high=1.32, value=1.318
                         ), equilibrium_angle=ContinuousParameter(
                         low=-140 / 180 * np.pi, high=140 / 180 * np.pi, value=-140 / 180 * np.pi
                         )

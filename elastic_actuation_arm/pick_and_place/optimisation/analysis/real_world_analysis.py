@@ -50,13 +50,13 @@ FC_CONFIGURATION_TO_TIME = {
 }
 
 
-def add_load_torque(dataframe: pandas.DataFrame, joint_index: int) -> None:
+def add_load_torque(dataframe: pandas.DataFrame, joint_index: int, column_name: str = "load_torque") -> None:
     load_torques = calculate_load_torque(joint_index=joint_index,
                                          torque=dataframe['torque'].to_numpy(),
                                          vel=dataframe['q_vel'].to_numpy(),
                                          acc=dataframe['q_acc'].to_numpy())
 
-    dataframe['load_torque'] = load_torques
+    dataframe[column_name] = load_torques
 
 
 def load_rw_dataframes(path: str, configuration: str) -> List[pandas.DataFrame]:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from elastic_actuation_arm.calibration.environment.environment import \
@@ -7,6 +8,7 @@ from elastic_actuation_arm.calibration.environment.environment import \
 from erpy.base.parameters import FixedParameter
 from erpy.base.phenome import Controller
 from erpy.base.specification import ControllerSpecification
+from erpy.utils import colors
 
 
 class ManipulatorCalibrationControllerSpecification(ControllerSpecification):
@@ -53,3 +55,19 @@ class ManipulatorCalibrationController(Controller):
         radians = degrees / 180 * np.pi
         radians += q0
         return radians[1:]
+
+if __name__ == '__main__':
+    amplitude = 100
+    ff0 = 0.2
+    ff1 = 0.01
+    fn = lambda time, f0, f1: amplitude * time / 60 * np.sin(
+            2 * np.pi * (f0 * time + (f1 - f0) / (2 * 60) * (time ** 2))
+            )
+
+    t = np.linspace(0, 60, 10000)
+    y1 = fn(t, ff0, ff1)
+    y2 = fn(t, ff1, ff0)
+    plt.plot(t, y1, color=colors.rgba_red)
+    plt.plot(t, y2, color=colors.rgba_green)
+    plt.savefig("calibration_sweep.svg")
+    plt.close()
