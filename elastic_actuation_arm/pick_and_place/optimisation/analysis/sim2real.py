@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 # import matplotlib as mpl
 # mpl.use('MacOSX')
@@ -144,27 +144,6 @@ def calculate_nrmse(
     return np.sqrt(nmse)
 
 
-def window_shift(
-        time: np.ndarray,
-        sm_values: np.ndarray,
-        rw_values: np.ndarray,
-        shift: int
-        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    if shift < 0:
-        shifted_time = time[abs(shift):]
-        shifted_sm_values = sm_values[abs(shift):]
-        shifted_rw_values = rw_values[:shift]
-    elif shift > 0:
-        shifted_time = time[:-shift]
-        shifted_sm_values = sm_values[:-shift]
-        shifted_rw_values = rw_values[shift:]
-    else:
-        shifted_time = time
-        shifted_sm_values = sm_values
-        shifted_rw_values = rw_values
-    return shifted_time, shifted_sm_values, shifted_rw_values
-
-
 if __name__ == '__main__':
     # Create q, qvel, qacc, torque, load torque comparisons between sim and real
     rw_base_path = "./pick_and_place/optimisation/data/rw_validation"
@@ -210,26 +189,8 @@ if __name__ == '__main__':
                         all_torques[f"{configuration}_phase_{i}_joint_{joint}_ba_torque"] = sm_df[
                             "ba_torque"].to_numpy()
 
-                        # Shift
-                    window_size_in_seconds = 0.3
-                    dt = 0.006
-                    window_size = int(window_size_in_seconds // dt)
-                    shifts = list(range(-window_size, window_size))
-                    minimum_error = np.inf
-                    best_shift = None
-                    for shift in shifts:
-                        _, shifted_sm_values, shifted_rw_values = window_shift(
-                                time=time, sm_values=sm_values, rw_values=rw_values, shift=shift
-                                )
-
-                        nrmse = calculate_nrmse(
-                                true=shifted_rw_values, pred=shifted_sm_values, )
-                        if nrmse < minimum_error:
-                            best_shift = shift
-                            minimum_error = nrmse
-
-                    time, sm_values, rw_values = window_shift(
-                            time=time, sm_values=sm_values, rw_values=rw_values, shift=best_shift
+                    error = calculate_nrmse(
+                            true=rw_values, pred=sm_values
                             )
                     add_to_current_plot(
                             time=time + i * RW_CONFIGURATION_TO_TIME[configuration]["go"],
@@ -241,32 +202,20 @@ if __name__ == '__main__':
                             )
                     if "load_torque" in column:
                         if configuration == "PEA" or configuration == "FULL":
-                            _, torques, _ = window_shift(
-                                    time=sm_df["time"].to_numpy(),
-                                    sm_values=sm_df["pea_torque"].to_numpy(),
-                                    rw_values=rw_values.copy(),
-                                    shift=best_shift
-                                    )
                             add_sim_to_current_plot(
                                     time=time + i * RW_CONFIGURATION_TO_TIME[configuration]["go"],
-                                    sm_values=torques,
+                                    sm_values=sm_df["pea_torque"].to_numpy(),
                                     color=colors.rgba_orange,
                                     label="pea torque"
                                     )
                         if configuration == "BA" or configuration == "FULL":
-                            _, torques, _ = window_shift(
-                                    time=sm_df["time"].to_numpy(),
-                                    sm_values=sm_df["ba_torque"].to_numpy(),
-                                    rw_values=rw_values.copy(),
-                                    shift=best_shift
-                                    )
                             add_sim_to_current_plot(
                                     time=time + i * RW_CONFIGURATION_TO_TIME[configuration]["go"],
-                                    sm_values=torques,
+                                    sm_values=sm_df["ba_torque"].to_numpy(),
                                     color=colors.rgba_blue,
                                     label="ba torque"
                                     )
-                    all_nrmses[f"configuration_{configuration}_joint_{joint}_{column}_phase_{i}"] = minimum_error
+                    all_nrmses[f"configuration_{configuration}_joint_{joint}_{column}_phase_{i}"] = error
 
                 save_current_plot(
                         configuration=configuration, column=column, joint_name=joint, legend=True

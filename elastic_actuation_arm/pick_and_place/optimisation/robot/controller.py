@@ -66,8 +66,9 @@ class ManipulatorAkimaSpineControllerSpecification(ControllerSpecification):
 
         return ManipulatorAkimaSpineControllerSpecification(go_intermediate_q=go_intermediate_q,
                                                             ret_intermediate_q=ret_intermediate_q,
-                                                            go_duration=ContinuousParameter(low=1., high=10., value=3),
-                                                            ret_duration=ContinuousParameter(low=1., high=10., value=3))
+                                                            go_duration=ContinuousParameter(low=1., high=5., value=2.5),
+                                                            ret_duration=ContinuousParameter(low=1., high=5.,
+                                                                                             value=2.5))
 
     @property
     def num_points(self) -> int:

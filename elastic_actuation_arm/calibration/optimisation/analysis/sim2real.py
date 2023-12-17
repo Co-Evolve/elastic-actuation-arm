@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Tuple
 
 # import matplotlib as mpl
 # mpl.use('MacOSX')
@@ -99,27 +98,6 @@ def calculate_nrmse(
     return np.sqrt(nmse)
 
 
-def window_shift(
-        time: np.ndarray,
-        sm_values: np.ndarray,
-        rw_values: np.ndarray,
-        shift: int
-        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    if shift < 0:
-        shifted_time = time[abs(shift):]
-        shifted_sm_values = sm_values[abs(shift):]
-        shifted_rw_values = rw_values[:shift]
-    elif shift > 0:
-        shifted_time = time[:-shift]
-        shifted_sm_values = sm_values[:-shift]
-        shifted_rw_values = rw_values[shift:]
-    else:
-        shifted_time = time
-        shifted_sm_values = sm_values
-        shifted_rw_values = rw_values
-    return shifted_time, shifted_sm_values, shifted_rw_values
-
-
 if __name__ == '__main__':
     # Create q, qvel, qacc, torque, load torque comparisons between sim and real
     rw_base_path = "./calibration/environment/real_world_data/version2"
@@ -154,29 +132,8 @@ if __name__ == '__main__':
                         values=rw_values, simulation_timesteps=time, real_world_timesteps=rw_df["time"]
                         )
 
-                # Shift
-                window_size_in_seconds = 3
-                dt = 0.006
-                window_size = int(window_size_in_seconds // dt)
-                shifts = list(range(-window_size, window_size))
-                minimum_error = np.inf
-                best_shift = None
-                for shift in shifts:
-                    _, shifted_sm_values, shifted_rw_values = window_shift(
-                            time=time, sm_values=sm_values, rw_values=rw_values, shift=shift
-                            )
+                error = calculate_nrmse(true=rw_values, pred=sm_values)
 
-                    # Calculate NRMSE
-                    nrmse = calculate_nrmse(
-                            true=shifted_rw_values, pred=shifted_sm_values
-                            )
-                    if nrmse < minimum_error:
-                        best_shift = shift
-                        minimum_error = nrmse
-
-                time, sm_values, rw_values = window_shift(
-                        time=time, sm_values=sm_values, rw_values=rw_values, shift=best_shift
-                        )
                 # Create plots
                 create_plot(
                         time=time,
@@ -187,8 +144,8 @@ if __name__ == '__main__':
                         joint_name=joint
                         )
 
-                print(f"\t\t{column}:\t\t{minimum_error:4f}")
-                all_nrmses[f"trajectory_{trajectory_id}_joint_{joint_index}_{column}"] = minimum_error  # shifts = list(
+                print(f"\t\t{column}:\t\t{error:4f}")
+                all_nrmses[f"trajectory_{trajectory_id}_joint_{joint_index}_{column}"] = error  # shifts = list(
 
     trajectory_ids = [1, 3, 4, 6, 7, 9, 10, 12]
     SA_trajectories = [3, 6, 9, 12]
