@@ -54,7 +54,8 @@ def add_load_torque(dataframe: pandas.DataFrame, joint_index: int, column_name: 
     load_torques = calculate_load_torque(joint_index=joint_index,
                                          torque=dataframe['torque'].to_numpy(),
                                          vel=dataframe['q_vel'].to_numpy(),
-                                         acc=dataframe['q_acc'].to_numpy())
+                                         acc=dataframe['q_acc'].to_numpy()
+                                         )
 
     dataframe[column_name] = load_torques
 

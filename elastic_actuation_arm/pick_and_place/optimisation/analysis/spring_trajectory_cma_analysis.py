@@ -109,7 +109,7 @@ if __name__ == '__main__':
 
     ea = EA(config=ea_config)
 
-    spring_configs = ["bea"]
+    spring_configs = ["pea", "bea", "full"]
     all_genomes = []
     all_evaluation_results = []
     all_run_paths = []

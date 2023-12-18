@@ -116,21 +116,21 @@ def save_current_plot(
         ) -> None:
     if legend:
         plt.legend()
-    plt.gca().spines["top"].set_visible(False)
-    plt.gca().spines["right"].set_visible(False)
-    plt.gca().spines["left"].set_visible(False)
-    plt.gca().spines["bottom"].set_visible(False)
-    plt.gca().yaxis.set_label_position("right")
+    # plt.gca().spines["top"].set_visible(False)
+    # plt.gca().spines["right"].set_visible(False)
+    # plt.gca().spines["left"].set_visible(False)
+    # plt.gca().spines["bottom"].set_visible(False)
+    # plt.gca().yaxis.set_label_position("right")
     go_time = RW_CONFIGURATION_TO_TIME[configuration]["go"]
     return_time = RW_CONFIGURATION_TO_TIME[configuration]["return"]
-    plt.xticks(ticks=[0, go_time, go_time + return_time])
-    max_y = max([max(line.get_ydata()) for line in plt.gca().lines])
-    min_y = min([min(line.get_ydata()) for line in plt.gca().lines])
-    plt.yticks(ticks=[min_y, -0, max_y])
-    if column == "load_torque" and joint_name == "total":
-        print(f"{configuration} -> {column} -> {joint_name} -> {[min_y, -0, max_y]}")
-    plt.xlim([0, go_time + return_time])
-    plt.ylim([-25, 60])
+    # plt.xticks(ticks=[0, go_time, go_time + return_time])
+    # max_y = max([max(line.get_ydata()) for line in plt.gca().lines])
+    # min_y = min([min(line.get_ydata()) for line in plt.gca().lines])
+    # plt.yticks(ticks=[min_y, -0, max_y])
+    # if column == "load_torque" and joint_name == "total":
+    #     print(f"{configuration} -> {column} -> {joint_name} -> {[min_y, -0, max_y]}")
+    # plt.xlim([0, go_time + return_time])
+    # plt.ylim([-25, 60])
     plt.savefig(f"./pick_and_place/optimisation/data/sim2real/{configuration}_{column}_{joint_name}.svg")
     plt.close()
 

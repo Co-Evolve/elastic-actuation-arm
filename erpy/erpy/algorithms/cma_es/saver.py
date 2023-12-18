@@ -31,7 +31,7 @@ class RenameUnpickler(pickle.Unpickler):
         if module == "elastic_actuation_arm.simulation.calibration.optimisation.genome":
             renamed_module = "elastic_actuation_arm.calibration.optimisation.robot.genome"
         elif module == ("elastic_actuation_arm.simulation.pick_and_place.optimisation"
-                         ".spring_trajectory_co_optimisatiogenome"):
+                         ".spring_trajectory_co_optimisation.genome"):
             renamed_module = "elastic_actuation_arm.pick_and_place.optimisation.robot.genome"
 
         return super(RenameUnpickler, self).find_class(renamed_module, name)
