@@ -30,5 +30,5 @@ Metrics are logged and automatically saved on the cloud via [Weights & Biases](h
 ## Citation
 
 ```
-todo
+Marchal M, Marzougui D, Furnémont R, Verstraten T, wyffels F. Minimizing torque requirements in robotic manipulation through elastic elements optimization in a physics engine. International Journal of Advanced Robotic Systems. 2024;21(1). doi:10.1177/17298806241228371
 ```
